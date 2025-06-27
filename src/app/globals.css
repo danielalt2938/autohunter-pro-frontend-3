@@ -76,3 +76,33 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+.ais-Hits-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .ais-Hits-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 768px) {
+  .ais-Hits-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 1280px) {
+  .ais-Hits-list {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+mark {
+  background: linear-gradient(90deg, #FFB3B0 0%, #FF6F61 100%);
+  color: white;
+  border-radius: 0.25rem;
+  padding: 0 0.2em;
+  font-weight: bold;
+}
