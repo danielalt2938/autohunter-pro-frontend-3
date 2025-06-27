@@ -13,6 +13,8 @@ if (!getApps().length) {
   });
 }
 
+console.log(process.env.FIREBASE_ADMIN_PRIVATE_KEY, "HELLOOOOOOOO\n\n\n");
+
 const auth = getAuth();
 const db = getFirestore();
 
@@ -32,7 +34,7 @@ export async function POST(req: NextRequest) {
     const userDoc = db.collection('users').doc(userRecord.uid);
     await userDoc.set({
       email: email,
-      role: "user",
+      role: "Free User",
       stripeId: null,
       subscriptionId: null,
       subscriptionStatus: null,

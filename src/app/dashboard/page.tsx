@@ -6,7 +6,18 @@ import { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Flame } from 'lucide-react'
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { 
+  Flame, 
+  Bell, 
+  Target,
+  Car,
+  MapPin,
+  DollarSign,
+  Calendar,
+  X
+} from 'lucide-react'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 
@@ -16,6 +27,17 @@ export default function Dashboard() {
   const { user, loading } = useAuth();
   const [role, setRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [alerts, setAlerts] = useState([
+    { id: 1, model: "Honda Accord", years: "2017-2020", price: "9000", distance: "50" },
+    { id: 2, model: "Toyota Camry", years: "2018-2021", price: "12000", distance: "75" }
+  ]);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newAlert, setNewAlert] = useState({
+    model: "",
+    years: "",
+    price: "",
+    distance: ""
+  });
   const router = useRouter();
 
   const getFirebaseToken = async () => {
@@ -48,6 +70,22 @@ export default function Dashboard() {
     const stripe = await stripePromise;
     await stripe?.redirectToCheckout({ sessionId: data.sessionId });
     setIsLoading(false);
+  };
+
+  const handleCreateAlert = () => {
+    if (newAlert.model && newAlert.years && newAlert.price && newAlert.distance) {
+      const alert = {
+        id: Date.now(),
+        ...newAlert
+      };
+      setAlerts([...alerts, alert]);
+      setNewAlert({ model: "", years: "", price: "", distance: "" });
+      setShowCreateForm(false);
+    }
+  };
+
+  const handleDeleteAlert = (id: number) => {
+    setAlerts(alerts.filter(alert => alert.id !== id));
   };
 
   useEffect(() => {
@@ -94,40 +132,127 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#333333] flex flex-col">
       <Navigation isAuthenticated={true} />
+      
       {/* Main content */}
-      <main className="flex-grow flex items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-md bg-[#FFE5E5] border-none">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Welcome to your dashboard</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center">{user?.email}</p>
-            <div className="flex flex-col space-y-4">
-              <Button
-                onClick={() => auth.signOut()}
-                className="bg-[#FF6F61] text-white hover:bg-[#FFB3B0]"
-              >
-                Sign Out
-              </Button>
-              {role === 'Free User' ? (
-                <Button
-                  onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID as string)}
-                  className="bg-[#FF6F61] text-white hover:bg-[#FFB3B0]"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Loading...' : 'Upgrade Account'}
-                </Button>
+      <main className="flex-grow p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          
+          {/* Dashboard Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-[#333333]">
+                Alerts & Filters
+              </h1>
+              <p className="text-[#333333]/60 mt-1">
+                Manage your vehicle alerts and get notified when matching deals appear.
+              </p>
+            </div>
+          </div>
+
+          {/* Alerts Section */}
+          <Card className="bg-[#FFE5E5] border-none">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Bell className="h-5 w-5 text-[#FF6F61]" />
+                <span>🔔 Active Alerts</span>
+              </CardTitle>
+              <p className="text-sm text-[#333333]/60">
+                Get notified when specific vehicles, price ranges, or keywords appear.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {alerts.map((alert) => (
+                <div key={alert.id} className="p-4 bg-white rounded-lg border border-[#FFB3B0] flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <Car className="h-5 w-5 text-[#FF6F61]" />
+                    <div>
+                      <p className="font-medium text-sm">{alert.model} {alert.years}</p>
+                      <p className="text-xs text-[#333333]/60">Under ${alert.price} within {alert.distance} miles</p>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleDeleteAlert(alert.id)}
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              
+              {showCreateForm ? (
+                <div className="p-4 bg-white rounded-lg border border-[#FFB3B0] space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="model">Vehicle Model</Label>
+                      <Input 
+                        id="model"
+                        value={newAlert.model}
+                        onChange={(e) => setNewAlert({...newAlert, model: e.target.value})}
+                        placeholder="e.g., Honda Accord"
+                        className="bg-white border-[#FFB3B0] focus:border-[#FF6F61] focus:ring-[#FF6F61]"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="years">Year Range</Label>
+                      <Input 
+                        id="years"
+                        value={newAlert.years}
+                        onChange={(e) => setNewAlert({...newAlert, years: e.target.value})}
+                        placeholder="e.g., 2017-2020"
+                        className="bg-white border-[#FFB3B0] focus:border-[#FF6F61] focus:ring-[#FF6F61]"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="price">Max Price</Label>
+                      <Input 
+                        id="price"
+                        value={newAlert.price}
+                        onChange={(e) => setNewAlert({...newAlert, price: e.target.value})}
+                        placeholder="e.g., 9000"
+                        className="bg-white border-[#FFB3B0] focus:border-[#FF6F61] focus:ring-[#FF6F61]"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="distance">Max Distance (miles)</Label>
+                      <Input 
+                        id="distance"
+                        value={newAlert.distance}
+                        onChange={(e) => setNewAlert({...newAlert, distance: e.target.value})}
+                        placeholder="e.g., 50"
+                        className="bg-white border-[#FFB3B0] focus:border-[#FF6F61] focus:ring-[#FF6F61]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      onClick={handleCreateAlert}
+                      className="bg-[#FF6F61] text-white hover:bg-[#FFB3B0]"
+                    >
+                      Create Alert
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowCreateForm(false)}
+                      className="border-[#FF6F61] text-[#FF6F61] hover:bg-[#FFE5E5]"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
               ) : (
-                <Button
-                  className="bg-[#FFB3B0] text-[#333333] cursor-not-allowed"
-                  disabled
+                <Button 
+                  onClick={() => setShowCreateForm(true)}
+                  className="w-full bg-[#FF6F61] text-white hover:bg-[#FFB3B0]"
                 >
-                  You are already "{role}"
+                  <Target className="h-4 w-4 mr-2" />
+                  Create New Alert
                 </Button>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {/* Footer */}
@@ -135,7 +260,7 @@ export default function Dashboard() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between py-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-4">
             <Flame className="h-6 w-6 text-[#FF6F61]" />
-            <span className="text-sm font-medium">© 2024 SaaSBoiler. All rights reserved.</span>
+            <span className="text-sm font-medium">© 2024 AutoHunter Pro. All rights reserved.</span>
           </div>
           <nav className="flex items-center space-x-4">
             <Link href="#" className="text-sm font-medium hover:text-[#FF6F61] transition-colors">
