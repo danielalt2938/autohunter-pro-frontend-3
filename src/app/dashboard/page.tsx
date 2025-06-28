@@ -25,7 +25,7 @@ import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 
 // Correct import based on official tutorial
-import { liteClient } from 'algoliasearch/lite';
+import liteClient from "algoliasearch/lite"
 
 import {
   InstantSearch,
