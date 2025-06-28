@@ -41,7 +41,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 const searchClient = liteClient('UAP9GN7E33', 'e53f5aae30b9abb134cc1fc817d8cd9a');
 
 // Custom SearchBox with full styling control
-const CustomSearchBox = connectSearchBox(({ currentRefinement, refine }) => (
+const CustomSearchBox = connectSearchBox(({ currentRefinement, refine }: { currentRefinement: string; refine: (value: string) => void }) => (
   <input
     className="w-full pl-16 pr-6 py-6 text-xl border-3 border-[#FFB3B0] rounded-2xl bg-white/90 placeholder-[#333333]/50 focus:border-[#FF6F61] focus:ring-8 focus:ring-[#FF6F61]/20 focus:outline-none transition-all duration-300 shadow-lg font-medium"
     type="search"
